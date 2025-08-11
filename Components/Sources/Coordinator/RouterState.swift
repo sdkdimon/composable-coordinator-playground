@@ -6,16 +6,14 @@ public struct RouterState<Screen> {
   @ObservationStateIgnored
   var routes: StackState<Screen>
   var routeStyles: IdentifiedArrayOf<IdentifiedRouteStyle<StackElementID>>
+  @ObservationStateIgnored
+  var routesAlignmentRange: PartialRangeFrom<Int>?
   
   public init(root: Screen) {
     self.routes = .init()
     self.routeStyles = []
     self.append(screen: root, routeStyle: .root)
   }
-  
-//  func next(after elemId: StackElementID) -> StackElementID? {
-//    return routes.next(after: elemId)
-//  }
   
   mutating func append(screen: Screen, routeStyle: RouteStyle) {
     routes.append(screen)
@@ -34,15 +32,24 @@ public struct RouterState<Screen> {
   public mutating func pop(from id: StackElementID) {
     self.routeStyles[id: id] = nil
   }
+  
+  public mutating func popToRoot() {
+    guard let id = self.routes.ids.first else { return }
+    self.pop(to: id)
+  }
+  
+  public mutating func pop(to id: StackElementID) {
+    guard let index = self.routes.ids.firstIndex(of: id)
+    else { return }
+    let rangeToRemove = index.advanced(by: 1)...
+    self.routesAlignmentRange = rangeToRemove
+    self.routeStyles.removeSubrange(rangeToRemove)
+  }
+  
+  public mutating func onDisappear(id: StackElementID) {
+    if let routesAlignmentRange = routesAlignmentRange {
+      self.routesAlignmentRange = nil
+      self.routes.removeSubrange(routesAlignmentRange)
+    }
+  }
 }
-
-//extension StackState {
-//  func next(after elemId: StackElementID) -> StackElementID? {
-//    if let index = self.ids.firstIndex(of: elemId) {
-//      if let nextElem = self.ids[safe: index + 1] {
-//        return nextElem
-//      }
-//    }
-//    return nil
-//  }
-//}

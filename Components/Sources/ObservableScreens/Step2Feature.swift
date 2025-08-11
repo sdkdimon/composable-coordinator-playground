@@ -15,6 +15,7 @@ public struct Step2Feature {
   
   public enum Action {
     case incrementTapped
+    case goToRoot
   }
   
   public init() {}
@@ -24,6 +25,8 @@ public struct Step2Feature {
       switch action {
       case .incrementTapped:
         state.value += 1
+        return .none
+      default:
         return .none
       }
     }
@@ -45,6 +48,9 @@ public struct Step2FeatureView: View {
         IntView(value: store.value)
         Button("Increment") {
           store.send(.incrementTapped)
+        }
+        Button("Go to root") {
+          store.send(.goToRoot)
         }
       }
       .navigationTitle(store.title)

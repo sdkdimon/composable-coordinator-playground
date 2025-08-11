@@ -28,17 +28,19 @@ import ComposableArchitecture
 extension Reducer {
   public func routerReducer<DestinationState: CaseReducerState, DestinationAction>
   (_ toStackState: WritableKeyPath<State, RouterState<DestinationState>>,
-    action toStackAction: CaseKeyPath<Action, StackAction<DestinationState, DestinationAction>>,
+    action toStackAction: CaseKeyPath<Action, RouterAction<DestinationState, DestinationAction>>,
   ) -> some ReducerOf<Self> where DestinationState.StateReducer.Action == DestinationAction {
     Reduce { state, action in
       switch AnyCasePath(toStackAction).extract(from: action) {
-      case let .popFrom(id: id):
+      case let .stackAction(.popFrom(id: id)):
         state[keyPath: toStackState].pop(from: id)
+      case let .onDisapear(id):
+        state[keyPath: toStackState].onDisappear(id: id)
       default:
         break
       }
       return self.reduce(into: &state, action: action)
     }
-    .forEach(toStackState.appending(path: \.routes), action: toStackAction)
+    .forEach(toStackState.appending(path: \.routes), action: toStackAction.appending(path: \.stackAction))
   }
 }

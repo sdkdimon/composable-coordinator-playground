@@ -1,13 +1,13 @@
 import Foundation
 import SwiftUI
-import ComposableArchitecture
+@_spi(Internals) import ComposableArchitecture
 
 public struct TCARouter<State, Action, V: View>: View {
-  let store: Store<RouterState<State>, StackAction<State, Action>>
+  @Perception.Bindable var store: Store<RouterState<State>, RouterAction<State, Action>>
   let buildView: (Store<State, Action>) -> V
   
  public init(
-  store: Store<RouterState<State>, StackAction<State, Action>>,
+  store: Store<RouterState<State>, RouterAction<State, Action>>,
   @ViewBuilder buildView: @escaping (Store<State, Action>) -> V
  )
   {
@@ -19,11 +19,12 @@ public struct TCARouter<State, Action, V: View>: View {
     WithPerceptionTracking {
       Node(
         state: store.routeStyles,
-        pop: { store.send(.popFrom(id: $0) ) },
+        pop: { store.send(.stackAction(.popFrom(id: $0))) },
+        onDisappear: { store.send(.onDisapear($0))},
         style: store.routeStyles.first!,
         buildView: { id in
           WithPerceptionTracking {
-            if let store = store.scope(state: \.routes[id: id], action: \.[id: id]) {
+            if let store = store.scope(state: \.routes[id: id], action: \.stackAction[id: id]) {
               buildView(store)
             }
           }

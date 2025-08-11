@@ -15,7 +15,7 @@ let package = Package(
     .library(name: "AppCoordinator", targets: ["AppCoordinator"]),
   ],
   dependencies: [
-    .package(url: "https://github.com/pointfreeco/swift-composable-architecture", exact: "1.19.1"),
+    .package(url: "https://github.com/pointfreeco/swift-composable-architecture", exact: "1.21.1"),
   ],
   targets: [
     .target(

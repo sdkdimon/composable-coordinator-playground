@@ -15,7 +15,7 @@ public struct AppCoordinator {
   }
   
   public enum Action {
-    case router(StackActionOf<Screen>)
+    case router(RouterAction<Screen.State, Screen.Action>)
   }
   
   public init() {}
@@ -23,12 +23,16 @@ public struct AppCoordinator {
   public  var body: some ReducerOf<Self> {
     Reduce { state, action in
       switch action {
-      case .router(.element(id: _, action: .landing(.nextStepTapped))):
+      case .router(.stackAction(.element(id: _, action: .landing(.nextStepTapped)))):
         state.routerState.push(screen: .step1(.init()))
         return .none
-      case .router(.element(id: _, action: .step1(.nextStepTapped))):
+      case .router(.stackAction(.element(id: _, action: .step1(.nextStepTapped)))):
         state.routerState.push(screen: .step2(.init()))
         return .none
+      case .router(.stackAction(.element(id: _, action: .step2(.goToRoot)))):
+        state.routerState.popToRoot()
+        return .none
+      
       default:
         return .none
       }

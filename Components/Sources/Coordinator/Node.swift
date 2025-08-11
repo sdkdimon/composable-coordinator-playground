@@ -5,6 +5,7 @@ import IdentifiedCollections
 struct Node<V: View, ID: Hashable>: View {
   let state: IdentifiedArrayOf<IdentifiedRouteStyle<ID>>
   let pop: (ID) -> Void
+  let onDisappear: (ID) -> Void
   let buildView: (ID) -> V
   let style: IdentifiedRouteStyle<ID>
   @State var isAppeared = false
@@ -17,11 +18,13 @@ struct Node<V: View, ID: Hashable>: View {
   init(
     state: IdentifiedArrayOf<IdentifiedRouteStyle<ID>>,
     pop: @escaping (ID) -> Void,
+    onDisappear: @escaping (ID) -> Void,
     style: IdentifiedRouteStyle<ID>,
     @ViewBuilder
     buildView: @escaping (ID) -> V) {
       self.state = state
       self.pop = pop
+      self.onDisappear = onDisappear
       self.style = style
       self.buildView = buildView
     }
@@ -47,6 +50,7 @@ struct Node<V: View, ID: Hashable>: View {
       Node(
         state: state,
         pop: pop,
+        onDisappear: onDisappear,
         style: nextStyle,
         buildView: buildView
       )
@@ -62,7 +66,10 @@ struct Node<V: View, ID: Hashable>: View {
       )
     //TODO: Add sheet and cover
       .onAppear { isAppeared = true }
-      .onDisappear { isAppeared = false }
+      .onDisappear {
+        isAppeared = false
+        onDisappear(style.id)
+      }
   }
   
   var body: some View {
